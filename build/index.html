@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+    <title>redditP</title>
+    <meta name="description" content="A fullscreen presentation or slide show of reddit. RedditP" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="format-detection" content="date=no" />
+    <meta name="format-detection" content="address=no" />
+    <link rel="shortcut icon" href="/images/favicon.png" />
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.touchwipe.js"></script>
+    <script type="text/javascript" src="/js/EventEmitter.js"></script>
+    <script type="text/javascript" src="/js/script.js"></script>
+    <script type="text/javascript" src="https://assets.gfycat.com/js/gfyajax-0.517d.js"></script>
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-4533496-15']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+</head>
+<body id="page">
+    <div class="prevArrow fadeOnIdle" title="The arrow keys work too" id="prevButton"></div>
+    <div class="nextArrow fadeOnIdle" title="Try the arrow keys too" id="nextButton"></div>
+
+    <div id="controlsDiv" class='navbox clouds fadeOnIdle'>
+        <div class="collapser" data-openstate="open">-</div>
+        <div id="navboxContents">
+            <ul class="nbmenu">
+                <li id="subredditUrl"><noscript>No javascript, no gain.</noscript>
+                </li>
+                <li>
+                    <a href="https://github.com/ubershmekel/redditp/blob/master/README.md" title="hotkeys">hotkeys</a> -
+                    <a href="https://github.com/ubershmekel/redditp" title="redditp source on github">src</a> -
+                    <a href="http://www.reddit.com/r/redditp" title="who made this">blog</a>
+                </li>
+                <li>
+                    <input class="checkbox" type="checkbox" name="nsfw" id="nsfw" value="Auto" checked />
+                    <label class="checkbox over18" for="nsfw"> nsfw</label>
+                    <img src="/images/fullscreen.png" id="fullScreenButton" alt="Fullscreen" />
+                </li>
+            </ul>
+            <ul class="nbmenu">
+                <li>
+                    <input class="checkbox" type="checkbox" name="autoNextSlide" id="autoNextSlide" value="Auto" checked />
+                    <label class="checkbox" for="autoNextSlide"> Auto-next</label>
+                    every <input type="text" name="timeToNextSlide" id="timeToNextSlide" value="5" size="2" /> seconds
+                </li>
+                <li>
+                    <a id='navboxCommentsLink' href='#' title='Comments on reddit'>comments</a>
+                </li>
+                <li>
+                    <a id='navboxLink' href='#' title='placeholder'>image</a>
+                </li>
+            </ul>
+            <div class="numberButtonList">
+                <ul id="allNumberButtons">
+                <!-- Slide number buttons will be injected by jQuery -->
+                </ul>
+                <ul id="sfwNumberButtons">
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div id="titleDiv" class='navbox clouds'>
+        <div class="collapser" data-openstate="open">-</div>
+        <h2 id='navboxTitle'>
+            <noscript>Javascript is required for redditp to work :(</noscript>
+        </h2>
+        <h3><a id='navboxSubreddit' href="http://www.reddit.com">
+            <noscript>Javascript is required for redditp to work :(</noscript>
+        </a></h3>
+    </div>
+
+    <div id="recommend" style="display:none; text-align: center; margin: 10px; color: rgb(170, 170, 170);">
+        <p>Maybe try these presentations instead:</p>
+        <ul>
+            <li>
+                <a href="/r/earthporn">earthporn</a>
+            </li>
+            <li>
+                <a href="/r/aww">aww</a>
+            </li>
+            <li>
+                <a href="/r/foodporn">foodporn</a>
+            </li>
+            <li>
+                <a href="/r/funny">funny</a>
+            </li>
+            <li>
+                <a href="/r/gonewild">gonewild</a>
+            </li>
+            <li>
+                <a href="/r/spaceporn">spaceporn</a>
+            </li>
+            <li>
+                <a href="/r/gifs">gifs</a>
+            </li>
+            <li>
+                <a href="/r/all">all</a>
+            </li>
+        </ul>
+    </div>
+
+
+    <div id="pictureSlider">
+        <!-- Pictures will be injected by jQuery -->
+        <div>
+            <!-- Empty div to be animated out, do not erase -->
+        </div>
+    </div>
+
+</body>
+</html>

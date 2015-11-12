@@ -1,5 +1,6 @@
 /*
   Author: Yuval Greenfield (http://uberpython.wordpress.com)
+  Rebuild: Josh Vanderwillik
 
   You can save the HTML file and use it locally btw like so:
     file:///wherever/index.html?/r/aww
@@ -9,29 +10,145 @@
   Author of slideshow base :      Marco Kuiper (http://www.marcofolio.net/)
 */
 
-// TODO: refactor all the globals to use the rp object's namespace.
-var rp = {};
-rp.debug = true;
+;(function(){
+const APPLICATION_ID = 'f2edd1ef8e66eaf'
+const GOOD_PATH_REGEX = /r\/.+/
+const BASE_URL = 'https://www.reddit.com'
 
-// Speed of the animation
-var animationSpeed = 1000;
-var shouldAutoNextSlide = true;
-var timeToNextSlide = 6 * 1000;
-var cookieDays = 300;
+const ANIMATION_SPEED = 1000
+const timeToNextSlide = 6 * 1000
+const COOKIE_DAYS = 300
+const OPENSTATE_ATTR = "data-openstate"
 
-// Variable to store the images we need to set as background
-// which also includes some text and url's.
-rp.photos = [];
+const KEY_LEFT = 37
+const KEY_RIGHT = 39
+const KEY_UP = 38
+const KEY_DOWN = 40
+const KEY_ONE = 49
+const KEY_NINE = 57
+const KEY_SPACE = 32
+const KEY_PAGE_UP = 33
+const KEY_PAGE_DOWN = 34
+const KEY_ENTER = 13
+const KEY_A = 65
+const KEY_C = 67
+const KEY_F = 70
+const KEY_I = 73
+const KEY_R = 82
+const KEY_T = 84
 
-// 0-based index to set which picture to show first
-// init to -1 until the first image is loaded
-var activeIndex = -1;
+const exitFullscreen = document.exitFullscreen
+  || document.msExitFullscreen
+  || document.mozCancelFullScreen
+  || document.webkitExitFullscreen
+
+const goFullscreen = el => {
+  let fn = elem.requestFullscreen
+    || elem.msRequestFullscreen
+    || elem.mozRequestFullScreen
+    || elem.webkitRequestFullscreen
+
+  if (fn === elem.webkitRequestFullscreen) {
+    fn.call(el, Element.ALLOW_KEYBOARD_INPUT)
+  } else {
+    fn.call(el)
+  }
+}
+
+$.ajaxSetup({
+  headers: {
+    Authorization: `Client-ID ${APPLICATION_ID}`
+  }
+})
+
+class ShortCutListener extends EventEmitter {
+  constructor () {
+    this.start()
+  }
+
+  start () {
+    $(document).on('keyup.shortcutlistener', function (e) {
+      // The control key is most likely used for non redditp things
+      if(e.ctrlKey) return
+      switch (e.keyCode) {
+          case C_KEY: return this.emit('toggle-controls')
+          case T_KEY: return this.emit('toggle-title')
+          case A_KEY: return this.emit('toggle-auto')
+          case I_KEY: return this.emit('open-in-background')
+          case R_KEY: return this.emit('open-comments-in-background')
+          case F_KEY: return this.emit('toggle-fullscreen')
+          case PAGEUP: //fall through
+          case arrow.left: //fall through
+          case arrow.up: return this.emit('previous')
+          case PAGEDOWN:
+          case arrow.right:
+          case arrow.down:
+          case SPACE: return this.emit('next')
+      }
+    })
+  }
+
+  stop () {
+    $(document).off('.shortcutlistener')
+  }
+}
+
+class ViewBox {
+  constructor ($el) {
+    this.$el = $el
+    this.shortcuts = new ShortCutListener
+  }
+
+  init () {
+    this.$el.("#subredditUrl").text("Loading Reddit Slideshow")
+    this.$el.("#navboxTitle").text("Loading Reddit Slideshow")
+
+    this.$el.on('mousemove', )
+
+    this.$el.find('#prevButton').on('click', () => this.previousSlide())
+    this.$el.find('#nextButton').on('click', () => this.nextSlide())
+    this.shortcuts.on('previous', () => this.previousSlide())
+    this.shortcuts.on('next', () => this.nextSlide())
+
+    this.$el.find('#fullScreenButton').on('click', () => this.toggleFullScreen())
+    this.shortcuts.on('toggle-fullscreen', () => this.toggleFullScreen())
+
+    this.shortcuts.start()
+  }
+
+  toggleFullScreen () {
+
+  }
+
+  nextSlide () {
+
+  }
+
+  previousSlide () {
+
+  }
+
+  loadSubreddit (sub) {
+    let url = sub === ''? '/': sub
+    this.$el.('#subredditUrl').html(`<a href='${visitSubredditUrl}'>${displayedSubredditName}</a>`);
+
+    document.title = sub + ' | redditP'
+  }
+
+  fetchImages (sub) {
+    let url = BASE_URL + sub + ".json"
+    return $.getJSON(url)
+  }
+}
+
+$(function(){
+  window.rp = new ViewBox($('#page'))
+  window.rp.loadSubreddit(window.location.pathname)
+})
+
+})()
 
 $(function () {
-
-    $("#subredditUrl").text("Loading Reddit Slideshow");
-    $("#navboxTitle").text("Loading Reddit Slideshow");
-
     fadeoutWhenIdle = true;
     var setupFadeoutOnIdle = function () {
         $('.fadeOnIdle').fadeTo('fast', 0);
@@ -54,13 +171,6 @@ $(function () {
             fadeoutTimer = setTimeout(fadeoutFunction, 2000);
         });
     };
-    // this fadeout was really inconvenient on mobile phones
-    // and instead the minimize buttons should be used.
-    //setupFadeoutOnIdle();
-
-    var nextSlideTimeoutId = null;
-
-    var loadingNextImages = false;
 
     function nextSlide() {
         if(!nsfw) {
@@ -131,7 +241,6 @@ $(function () {
         preventDefaultEvents: false
     });
 
-    var OPENSTATE_ATTR = "data-openstate";
     $('.collapser').click(function () {
         var state = $(this).attr(OPENSTATE_ATTR);
         if (state == "open") {
@@ -193,40 +302,14 @@ $(function () {
     shouldAutoNextSlideCookie = "shouldAutoNextSlideCookie";
     var updateAutoNext = function () {
         shouldAutoNextSlide = $("#autoNextSlide").is(':checked');
-        setCookie(shouldAutoNextSlideCookie, shouldAutoNextSlide, cookieDays);
+        setCookie(shouldAutoNextSlideCookie, shouldAutoNextSlide, COOKIE_DAYS);
         resetNextSlideTimer();
-    };
-
-    var toggleFullScreen = function() {
-        var elem = document.getElementById('page');
-        if (document.fullscreenElement || // alternative standard method
-            document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement) { // current working methods
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if (document.msExitFullscreen) {
-                document.msExitFullscreen();
-            } else if (document.mozCancelFullScreen) {
-                document.mozCancelFullScreen();
-            } else if (document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            }
-        } else {
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen();
-            } else if (elem.msRequestFullscreen) {
-                elem.msRequestFullscreen();
-            } else if (elem.mozRequestFullScreen) {
-                elem.mozRequestFullScreen();
-            } else if (elem.webkitRequestFullscreen) {
-                elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-            }
-        }
     };
 
     nsfwCookie = "nsfwCookie";
     var updateNsfw = function () {
         nsfw = $("#nsfw").is(':checked');
-        setCookie(nsfwCookie, nsfw, cookieDays);
+        setCookie(nsfwCookie, nsfw, COOKIE_DAYS);
     };
 
     var initState = function () {
@@ -251,7 +334,7 @@ $(function () {
         var updateTimeToNextSlide = function () {
             var val = $('#timeToNextSlide').val();
             timeToNextSlide = parseFloat(val) * 1000;
-            setCookie(timeToNextSlideCookie, val, cookieDays);
+            setCookie(timeToNextSlideCookie, val, COOKIE_DAYS);
         };
 
         var timeToNextSlideCookie = "timeToNextSlideCookie";
@@ -263,12 +346,7 @@ $(function () {
             $('#timeToNextSlide').val(timeByCookie);
         }
 
-        $('#fullScreenButton').click(toggleFullScreen);
-
         $('#timeToNextSlide').keyup(updateTimeToNextSlide);
-
-        $('#prevButton').click(prevSlide);
-        $('#nextButton').click(nextSlide);
     };
 
     var addNumberButton = function (numberButton) {
@@ -328,78 +406,6 @@ $(function () {
         numberButton.addClass("numberButton");
         addNumberButton(numberButton);
     };
-
-    var arrow = {
-        left: 37,
-        up: 38,
-        right: 39,
-        down: 40
-    };
-    var ONE_KEY = 49;
-    var NINE_KEY = 57;
-    var SPACE = 32;
-    var PAGEUP = 33;
-    var PAGEDOWN = 34;
-    var ENTER = 13;
-    var A_KEY = 65;
-    var C_KEY = 67;
-    var F_KEY = 70;
-    var I_KEY = 73;
-    var R_KEY = 82;
-    var T_KEY = 84;
-
-
-    // Register keyboard events on the whole document
-    $(document).keyup(function (e) {
-        if(e.ctrlKey) {
-            // ctrl key is pressed so we're most likely switching tabs or doing something
-            // unrelated to redditp UI
-            return;
-        }
-
-        //log(e.keyCode, e.which, e.charCode);
-
-        // 37 - left
-        // 38 - up
-        // 39 - right
-        // 40 - down
-        // More info: http://stackoverflow.com/questions/302122/jquery-event-keypress-which-key-was-pressed
-        // http://stackoverflow.com/questions/1402698/binding-arrow-keys-in-js-jquery
-        var code = (e.keyCode ? e.keyCode : e.which);
-
-        switch (code) {
-            case C_KEY:
-                $('#controlsDiv .collapser').click();
-                break;
-            case T_KEY:
-                $('#titleDiv .collapser').click();
-                break;
-            case A_KEY:
-                $("#autoNextSlide").prop("checked", !$("#autoNextSlide").is(':checked'));
-                updateAutoNext();
-                break;
-            case I_KEY:
-                open_in_background("#navboxLink");
-                break;
-            case R_KEY:
-                open_in_background("#navboxCommentsLink");
-                break;
-            case F_KEY:
-                toggleFullScreen();
-                break;
-            case PAGEUP:
-            case arrow.left:
-            case arrow.up:
-                return prevSlide();
-            case PAGEDOWN:
-            case arrow.right:
-            case arrow.down:
-            case SPACE:
-                return nextSlide();
-        }
-    });
-
-
     //
     // Shows an image and plays the animation
     //
@@ -509,7 +515,7 @@ $(function () {
         //imgNode.appendTo(divNode);
         divNode.prependTo("#pictureSlider");
 
-        $("#pictureSlider div").fadeIn(animationSpeed);
+        $("#pictureSlider div").fadeIn(ANIMATION_SPEED);
         if(photo.isVideo){
             gfyCollection.init();
             //ToDo: find a better solution!
@@ -530,7 +536,7 @@ $(function () {
         }
 
         var oldDiv = $("#pictureSlider div:not(:first)");
-        oldDiv.fadeOut(animationSpeed, function () {
+        oldDiv.fadeOut(ANIMATION_SPEED, function () {
             oldDiv.remove();
             isAnimating = false;
         });
@@ -602,22 +608,6 @@ $(function () {
     var decodeUrl = function (url) {
         return decodeURIComponent(url.replace(/\+/g, " "));
     };
-    rp.getRestOfUrl = function () {
-        // Separate to before the question mark and after
-        // Detect predefined reddit url paths. If you modify this be sure to fix
-        // .htaccess
-        // This is a good idea so we can give a quick 404 page when appropriate.
-
-        var regexS = "(/(?:(?:r/)|(?:imgur/a/)|(?:user/)|(?:domain/)|(?:search))[^&#?]*)[?]?(.*)";
-        var regex = new RegExp(regexS);
-        var results = regex.exec(window.location.href);
-        //log(results);
-        if (results === null) {
-            return ["", ""];
-        } else {
-            return [results[1], decodeUrl(results[2])];
-        }
-    };
 
     var failCleanup = function() {
         if (rp.photos.length > 0) {
@@ -633,20 +623,6 @@ $(function () {
     };
 
     var getRedditImages = function () {
-        //if (noMoreToLoad){
-        //    log("No more images to load, will rotate to start.");
-        //    return;
-        //}
-
-        loadingNextImages = true;
-
-        var jsonUrl = rp.redditBaseUrl + rp.subredditUrl + ".json?jsonp=?" + after + "&" + getVars;
-        console.log(jsonUrl);
-        //log(jsonUrl);
-        var failedAjax = function (data) {
-            alert("Failed ajax, maybe a bad url? Sorry about that :(");
-            failCleanup();
-        };
         var handleData = function (data) {
             //redditData = data //global for debugging data
             // NOTE: if data.data.after is null then this causes us to start
@@ -670,17 +646,6 @@ $(function () {
 
             verifyNsfwMakesSense();
 
-            if (!rp.foundOneImage) {
-                // Note: the jsonp url may seem malformed but jquery fixes it.
-                //log(jsonUrl);
-                alert("Sorry, no displayable images found in that url :(");
-            }
-
-            // show the first image
-            if (activeIndex == -1) {
-                startAnimation(0);
-            }
-
             if (data.data.after == null) {
                 console.log("No more pages to load from this subreddit, reloading the start");
 
@@ -688,20 +653,7 @@ $(function () {
                 var numberButton = $("<span />").addClass("numberButton").text("-");
                 addNumberButton(numberButton);
             }
-            loadingNextImages = false;
-
         };
-
-        // I still haven't been able to catch jsonp 404 events so the timeout
-        // is the current solution sadly.
-        $.ajax({
-            url: jsonUrl,
-            dataType: 'jsonp',
-            success: handleData,
-            error: failedAjax,
-            404: failedAjax,
-            timeout: 5000
-        });
     };
 
     var getImgurAlbum = function (url) {
@@ -713,9 +665,6 @@ $(function () {
             failCleanup();
         };
         var handleData = function (data) {
-
-            //console.log(data);
-
             if (data.data.images.length === 0) {
                 alert("No data from this url :(");
                 return;
@@ -736,95 +685,11 @@ $(function () {
                 console.log(jsonUrl);
                 alert("Sorry, no displayable images found in that url :(");
             }
-
-            // show the first image
             if (activeIndex == -1) {
                 startAnimation(0);
             }
-
-            //log("No more pages to load from this subreddit, reloading the start");
-
-            // Show the user we're starting from the top
-            //var numberButton = $("<span />").addClass("numberButton").text("-");
-            //addNumberButton(numberButton);
-
-            loadingNextImages = false;
         };
-
-        $.ajax({
-            url: jsonUrl,
-            dataType: 'json',
-            success: handleData,
-            error: failedAjax,
-            404: failedAjax,
-            timeout: 5000,
-            beforeSend : function(xhr) {
-                xhr.setRequestHeader('Authorization',
-                    'Client-ID ' + 'f2edd1ef8e66eaf');}
-        });
     };
-
-    var setupUrls = function() {
-        rp.urlData = rp.getRestOfUrl();
-        //log(rp.urlData)
-        rp.subredditUrl = rp.urlData[0];
-        getVars = rp.urlData[1];
-
-        if (getVars.length > 0) {
-            getVarsQuestionMark = "?" + getVars;
-        } else {
-            getVarsQuestionMark = "";
-        }
-
-        // Remove .compact as it interferes with .json (we got "/r/all/.compact.json" which doesn't work).
-        rp.subredditUrl = rp.subredditUrl.replace(/.compact/, "");
-        // Consolidate double slashes to avoid r/all/.compact/ -> r/all//
-        rp.subredditUrl = rp.subredditUrl.replace(/\/{2,}/, "/");
-
-        var subredditName;
-        if (rp.subredditUrl === "") {
-            rp.subredditUrl = "/";
-            subredditName = "reddit.com" + getVarsQuestionMark;
-            //var options = ["/r/aww/", "/r/earthporn/", "/r/foodporn", "/r/pics"];
-            //rp.subredditUrl = options[Math.floor(Math.random() * options.length)];
-        } else {
-            subredditName = rp.subredditUrl + getVarsQuestionMark;
-        }
-
-
-        var visitSubredditUrl = rp.redditBaseUrl + rp.subredditUrl + getVarsQuestionMark;
-
-        // truncate and display subreddit name in the control box
-        var displayedSubredditName = subredditName;
-        // empirically tested capsize, TODO: make css rules to verify this is enough.
-        // it would make the "nsfw" checkbox be on its own line :(
-        var capsize = 19;
-        if(displayedSubredditName.length > capsize) {
-            displayedSubredditName = displayedSubredditName.substr(0,capsize) + "&hellip;";
-        }
-        $('#subredditUrl').html("<a href='" + visitSubredditUrl + "'>" + displayedSubredditName + "</a>");
-
-        document.title = "redditP - " + subredditName;
-    };
-
-
-
-
-    rp.redditBaseUrl = "http://www.reddit.com";
-    if (location.protocol === 'https:') {
-        // page is secure
-        rp.redditBaseUrl = "https://www.reddit.com";
-        // TODO: try "//" instead of specifying the protocol
-    }
-
-    var getVars;
-    var after = "";
-
-    initState();
-    setupUrls();
-
-    // if ever found even 1 image, don't show the error
-    rp.foundOneImage = false;
 
     if(rp.subredditUrl.indexOf('/imgur') == 0)
         getImgurAlbum(rp.subredditUrl);

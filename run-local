@@ -1,0 +1,20 @@
+#! /usr/bin/env bash
+
+base_dir=$( cd $( dirname ${BASH_SOURCE[0]} ) && pwd )
+
+cd $base_dir
+
+gulp
+gulp watch &
+gulp_pid=$!
+trap "kill $gulp_pid" EXIT
+
+docker run \
+  -it \
+  --rm \
+  -p 80:80 \
+  \
+  -v $base_dir/build:/usr/share/nginx/html \
+  -v $base_dir/nginx.conf:/etc/nginx/conf.d/default.conf \
+  \
+  nginx
