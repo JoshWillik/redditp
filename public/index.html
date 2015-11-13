@@ -6,34 +6,33 @@
     <meta name="description" content="A fullscreen presentation or slide show of reddit. RedditP" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="format-detection" content="date=no" />
-    <meta name="format-detection" content="address=no" />   
+    <meta name="format-detection" content="address=no" />
     <link rel="shortcut icon" href="/images/favicon.png" />
     <link rel="stylesheet" type="text/css" href="/css/style.css" />
-    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script type="text/javascript" src="/js/jquery.touchwipe.js"></script>
+    <script type="text/javascript" src="/js/EventEmitter.js"></script>
     <script type="text/javascript" src="/js/script.js"></script>
-    <script type="text/javascript" src="//assets.gfycat.com/js/gfyajax-0.517d.js"></script>
+    <script type="text/javascript" src="https://assets.gfycat.com/js/gfyajax-0.517d.js"></script>
     <script type="text/javascript">
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-4533496-15']);
-      _gaq.push(['_trackPageview']);
-
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
+      // var _gaq = _gaq || [];
+      // _gaq.push(['_setAccount', 'UA-4533496-15']);
+      // _gaq.push(['_trackPageview']);
+      //
+      // (function() {
+      //   var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      //   ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      //   var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      // })();
     </script>
 </head>
 <body id="page">
-    <div class="prevArrow fadeOnIdle" title="The arrow keys work too" id="prevButton"></div>
-    <div class="nextArrow fadeOnIdle" title="Try the arrow keys too" id="nextButton"></div>
-    
-    <div id="controlsDiv" class='navbox clouds fadeOnIdle'>
-        <div class="collapser" data-openstate="open">-</div>
+    <div class='navbox controls' data-openstate="open">
+        <div class="collapser">-</div>
         <div id="navboxContents">
             <ul class="nbmenu">
-                <li id="subredditUrl"><noscript>No javascript, no gain.</noscript>
+                <li>
+                  <a class="subreddit-url" href="https://reddit.com"></a>
                 </li>
                 <li>
                     <a href="https://github.com/ubershmekel/redditp/blob/master/README.md" title="hotkeys">hotkeys</a> -
@@ -68,52 +67,29 @@
             </div>
         </div>
     </div>
-    <div id="titleDiv" class='navbox clouds'>
-        <div class="collapser" data-openstate="open">-</div>
-        <h2 id='navboxTitle'>
+
+    <div class='navbox title-box' data-openstate="open">
+        <div class="collapser">-</div>
+        <h2 class='slide-title'>
             <noscript>Javascript is required for redditp to work :(</noscript>
         </h2>
-        <h3><a id='navboxSubreddit' href="http://www.reddit.com">
-            <noscript>Javascript is required for redditp to work :(</noscript>
-        </a></h3>
-    </div>        
+        <h3>
+          <a class="active-slide-permalink" href="http://www.reddit.com">
+            permalink
+          </a>
+        </h3>
+    </div>
 
     <div id="recommend" style="display:none; text-align: center; margin: 10px; color: rgb(170, 170, 170);">
-        <p>Maybe try these presentations instead:</p>
-        <ul>
-            <li>
-                <a href="/r/earthporn">earthporn</a>
-            </li>
-            <li>
-                <a href="/r/aww">aww</a>
-            </li>
-            <li>
-                <a href="/r/foodporn">foodporn</a>
-            </li>
-            <li>
-                <a href="/r/funny">funny</a>
-            </li>
-            <li>
-                <a href="/r/gonewild">gonewild</a>
-            </li>
-            <li>
-                <a href="/r/spaceporn">spaceporn</a>
-            </li>
-            <li>
-                <a href="/r/gifs">gifs</a>
-            </li>
-            <li>
-                <a href="/r/all">all</a>
-            </li>
-        </ul>    
+      <p>Maybe try these presentations instead:</p>
     </div>
-    
-    
-    <div id="pictureSlider">
-        <!-- Pictures will be injected by jQuery -->
-        <div>
-            <!-- Empty div to be animated out, do not erase -->
-        </div>
+
+
+    <div class="slideshow-container">
+      <div class="previous-arrow" title="The arrow keys work too"></div>
+      <div class="next-arrow" title="Try the arrow keys too"></div>
+
+      <div class="viewport"></div>
     </div>
 
 </body>

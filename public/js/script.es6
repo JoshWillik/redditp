@@ -2,9 +2,6 @@
   Author: Yuval Greenfield (http://uberpython.wordpress.com)
   Rebuild: Josh Vanderwillik
 
-  You can save the HTML file and use it locally btw like so:
-    file:///wherever/index.html?/r/aww
-
   Favicon by Double-J designs http://www.iconfinder.com/icondetails/68600/64/_icon
   HTML based on http://demo.marcofolio.net/fullscreen_image_slider/
   Author of slideshow base :      Marco Kuiper (http://www.marcofolio.net/)
@@ -18,7 +15,6 @@ const BASE_URL = 'https://www.reddit.com'
 const ANIMATION_SPEED = 1000
 const timeToNextSlide = 6 * 1000
 const COOKIE_DAYS = 300
-const OPENSTATE_ATTR = "data-openstate"
 
 const KEY_LEFT = 37
 const KEY_RIGHT = 39
@@ -55,35 +51,58 @@ const goFullscreen = el => {
   }
 }
 
-$.ajaxSetup({
-  headers: {
-    Authorization: `Client-ID ${APPLICATION_ID}`
+class Slideshow {
+
+}
+
+class CollapseBox {
+  constructor ($el) {
+    this.$el = $el
   }
-})
+  init () {
+    this.$el.on('click', '.collapser', () => this.toggle())
+  }
+  toggle () {
+    let state = this.$el.data('openstate');
+    let $collapse = this.$el.find('.collapser')
+    if (state == "open") {
+        $collapse.text("+")
+        var arrowLeftPosition = $collapse.position().left
+        this.$el
+          .animate({left: `-${arrowLeftPosition}px`})
+          .data('openstate', "closed");
+    } else {
+        $collapse.text("-");
+        this.$el
+          .animate({left: "0px"})
+          .data('openstate', "open");
+    }
+}}
 
 class ShortCutListener extends EventEmitter {
   constructor () {
+    super()
     this.start()
   }
 
   start () {
-    $(document).on('keyup.shortcutlistener', function (e) {
+    $(document).on('keyup.shortcutlistener', e => {
       // The control key is most likely used for non redditp things
       if(e.ctrlKey) return
       switch (e.keyCode) {
-          case C_KEY: return this.emit('toggle-controls')
-          case T_KEY: return this.emit('toggle-title')
-          case A_KEY: return this.emit('toggle-auto')
-          case I_KEY: return this.emit('open-in-background')
-          case R_KEY: return this.emit('open-comments-in-background')
-          case F_KEY: return this.emit('toggle-fullscreen')
-          case PAGEUP: //fall through
-          case arrow.left: //fall through
-          case arrow.up: return this.emit('previous')
-          case PAGEDOWN:
-          case arrow.right:
-          case arrow.down:
-          case SPACE: return this.emit('next')
+          case KEY_C: return this.emit('toggle-controls')
+          case KEY_T: return this.emit('toggle-title')
+          case KEY_A: return this.emit('toggle-auto')
+          case KEY_I: return this.emit('open-in-background')
+          case KEY_R: return this.emit('open-comments-in-background')
+          case KEY_F: return this.emit('toggle-fullscreen')
+          case KEY_PAGE_UP: //fall through
+          case KEY_LEFT: //fall through
+          case KEY_UP: return this.emit('previous')
+          case KEY_PAGE_DOWN:
+          case KEY_RIGHT:
+          case KEY_DOWN:
+          case KEY_SPACE: return this.emit('next')
       }
     })
   }
@@ -93,20 +112,17 @@ class ShortCutListener extends EventEmitter {
   }
 }
 
-class ViewBox {
+class RedditP {
   constructor ($el) {
     this.$el = $el
     this.shortcuts = new ShortCutListener
   }
 
   init () {
-    this.$el.("#subredditUrl").text("Loading Reddit Slideshow")
-    this.$el.("#navboxTitle").text("Loading Reddit Slideshow")
+    this.setTitle(null, 'Loading Reddit Slideshow', 'Loading Reddit Slideshow')
 
-    this.$el.on('mousemove', )
-
-    this.$el.find('#prevButton').on('click', () => this.previousSlide())
-    this.$el.find('#nextButton').on('click', () => this.nextSlide())
+    this.$el.find('.previous-button').on('click', () => this.previousSlide())
+    this.$el.find('.next-button').on('click', () => this.nextSlide())
     this.shortcuts.on('previous', () => this.previousSlide())
     this.shortcuts.on('next', () => this.nextSlide())
 
@@ -114,6 +130,22 @@ class ViewBox {
     this.shortcuts.on('toggle-fullscreen', () => this.toggleFullScreen())
 
     this.shortcuts.start()
+
+    this.$el.find(".slideshow-container").touchwipe({
+      wipeLeft: this.nextSlide.bind(this),
+      wipeRight: this.previousSlide.bind(this),
+      min_move_x: 20,
+      min_move_y: 20,
+      preventDefaultEvents: false
+    })
+
+    this.controlsBox = new CollapseBox(this.$el.find('.controls'))
+    this.titleBox = new CollapseBox(this.$el.find('.title-box'))
+
+    this.controlsBox.init()
+    this.titleBox.init()
+
+    this.slideshow = new Slideshow(this.$el.find('.slideshow-container'))
   }
 
   toggleFullScreen () {
@@ -128,84 +160,66 @@ class ViewBox {
 
   }
 
-  loadSubreddit (sub) {
-    let url = sub === ''? '/': sub
-    this.$el.('#subredditUrl').html(`<a href='${visitSubredditUrl}'>${displayedSubredditName}</a>`);
+  showSlide (slide) {
+    let subredditUrl = `/r/${slide.subreddit}`
+    this.setTitle(slide.url, subredditUrl, slide.title)
+  }
 
-    document.title = sub + ' | redditP'
+  loadSubreddit (sub) {
+    let name = sub === '/'? 'Homepage': sub
+    let subredditUrl = BASE_URL + sub
+    this.fetchImages(sub).then(images => {
+      console.log(images)
+      this.showSlide(images[0])
+    }, err => {
+      console.log(err)
+    })
   }
 
   fetchImages (sub) {
     let url = BASE_URL + sub + ".json"
-    return $.getJSON(url)
+    return $.getJSON(url).then(res => {
+      return res.data.children.map(item => {
+        return {
+          id: item.data.id,
+          title: item.data.title,
+          subreddit: item.data.subreddit,
+          nsfw: item.data.over_18,
+          comments: BASE_URL + item.data.permalink,
+          domain: item.data.domain,
+          url: item.data.url,
+        }
+      })
+    })
+  }
+
+  setTitle (url, subreddit, name) {
+    this.$el.find('.slide-title').text(name)
+    this.$el.find('.active-slide-permalink').attr('href', url)
+    this.$el.find('.subreddit-url')
+      .attr('href', BASE_URL + subreddit)
+      .text(subreddit)
+    document.title = `${name} | redditP`
   }
 }
 
 $(function(){
-  window.rp = new ViewBox($('#page'))
-  window.rp.loadSubreddit(window.location.pathname)
+  let rp = new RedditP($('#page'))
+  rp.init()
+
+  rp.registerPlugin(ImgurSlide)
+  rp.registerPlugin(ImgurAlbumSlide)
+  rp.registerPlugin(YoutubeSlide)
+  rp.registerPlugin(GyfCatSlide)
+
+  rp.loadSubreddit(window.location.pathname)
+
+  window.rp = rp
 })
 
 })()
 
 $(function () {
-    fadeoutWhenIdle = true;
-    var setupFadeoutOnIdle = function () {
-        $('.fadeOnIdle').fadeTo('fast', 0);
-        var navboxVisible = false;
-        var fadeoutTimer = null;
-        var fadeoutFunction = function () {
-            navboxVisible = false;
-            if (fadeoutWhenIdle) {
-                $('.fadeOnIdle').fadeTo('slow', 0);
-            }
-        };
-        $("body").mousemove(function () {
-            if (navboxVisible) {
-                clearTimeout(fadeoutTimer);
-                fadeoutTimer = setTimeout(fadeoutFunction, 2000);
-                return;
-            }
-            navboxVisible = true;
-            $('.fadeOnIdle').fadeTo('fast', 1);
-            fadeoutTimer = setTimeout(fadeoutFunction, 2000);
-        });
-    };
-
-    function nextSlide() {
-        if(!nsfw) {
-            for(var i = activeIndex + 1; i < rp.photos.length; i++) {
-                if (!rp.photos[i].over18) {
-                    return startAnimation(i);
-                }
-            }
-        }
-        if (isLastImage(activeIndex) && !loadingNextImages) {
-            // the only reason we got here and there aren't more pictures yet
-            // is because there are no more images to load, start over
-            return startAnimation(0);
-        }
-        startAnimation(activeIndex + 1);
-    }
-    function prevSlide() {
-        if(!nsfw) {
-            for(var i = activeIndex - 1; i > 0; i--) {
-                if (!rp.photos[i].over18) {
-                    return startAnimation(i);
-                }
-            }
-        }
-        startAnimation(activeIndex - 1);
-    }
-
-
-    var autoNextSlide = function () {
-        if (shouldAutoNextSlide) {
-            // startAnimation takes care of the setTimeout
-            nextSlide();
-        }
-    };
-
     function open_in_background(selector){
         // as per https://developer.mozilla.org/en-US/docs/Web/API/event.initMouseEvent
         // works on latest chrome, safari and opera
@@ -221,155 +235,7 @@ $(function () {
             link.dispatchEvent(mev);
         }
     }
-
-    $("#pictureSlider").touchwipe({
-        // wipeLeft means the user moved his finger from right to left.
-        wipeLeft: function () {
-            nextSlide();
-        },
-        wipeRight: function () {
-            prevSlide();
-        },
-        wipeUp: function () {
-            nextSlide();
-        },
-        wipeDown: function () {
-            prevSlide();
-        },
-        min_move_x: 20,
-        min_move_y: 20,
-        preventDefaultEvents: false
-    });
-
-    $('.collapser').click(function () {
-        var state = $(this).attr(OPENSTATE_ATTR);
-        if (state == "open") {
-            // close it
-            $(this).text("+");
-            // move to the left just enough so the collapser arrow is visible
-            var arrowLeftPoint = $(this).position().left;
-            $(this).parent().animate({
-                left: "-" + arrowLeftPoint + "px"
-            });
-            $(this).attr(OPENSTATE_ATTR, "closed");
-        } else {
-            // open it
-            $(this).text("-");
-            $(this).parent().animate({
-                left: "0px"
-            });
-            $(this).attr(OPENSTATE_ATTR, "open");
-        }
-    });
-
-    // maybe checkout http://engineeredweb.com/blog/09/12/preloading-images-jquery-and-javascript/ for implementing the old precache
-    var cache = [];
-    // Arguments are image paths relative to the current page.
-    var preLoadImages = function () {
-        var args_len = arguments.length;
-        for (var i = args_len; i--;) {
-            var cacheImage = document.createElement('img');
-            cacheImage.src = arguments[i];
-            cache.push(cacheImage);
-        }
-    };
-
-    var setCookie = function (c_name, value, exdays) {
-        var exdate = new Date();
-        exdate.setDate(exdate.getDate() + exdays);
-        var c_value = escape(value) + ((exdays === null) ? "" : "; expires=" + exdate.toUTCString());
-        document.cookie = c_name + "=" + c_value;
-    };
-
-    var getCookie = function (c_name) {
-        var i, x, y;
-        var cookiesArray = document.cookie.split(";");
-        for (i = 0; i < cookiesArray.length; i++) {
-            x = cookiesArray[i].substr(0, cookiesArray[i].indexOf("="));
-            y = cookiesArray[i].substr(cookiesArray[i].indexOf("=") + 1);
-            x = x.replace(/^\s+|\s+$/g, "");
-            if (x == c_name) {
-                return unescape(y);
-            }
-        }
-    };
-
-    var resetNextSlideTimer = function () {
-        clearTimeout(nextSlideTimeoutId);
-        nextSlideTimeoutId = setTimeout(autoNextSlide, timeToNextSlide);
-    };
-
-    shouldAutoNextSlideCookie = "shouldAutoNextSlideCookie";
-    var updateAutoNext = function () {
-        shouldAutoNextSlide = $("#autoNextSlide").is(':checked');
-        setCookie(shouldAutoNextSlideCookie, shouldAutoNextSlide, COOKIE_DAYS);
-        resetNextSlideTimer();
-    };
-
-    nsfwCookie = "nsfwCookie";
-    var updateNsfw = function () {
-        nsfw = $("#nsfw").is(':checked');
-        setCookie(nsfwCookie, nsfw, COOKIE_DAYS);
-    };
-
-    var initState = function () {
-        var nsfwByCookie = getCookie(nsfwCookie);
-        if (nsfwByCookie == undefined) {
-            nsfw = true;
-        } else {
-            nsfw = (nsfwByCookie === "true");
-            $("#nsfw").prop("checked", nsfw);
-        }
-        $('#nsfw').change(updateNsfw);
-
-        var autoByCookie = getCookie(shouldAutoNextSlideCookie);
-        if (autoByCookie == undefined) {
-            updateAutoNext();
-        } else {
-            shouldAutoNextSlide = (autoByCookie === "true");
-            $("#autoNextSlide").prop("checked", shouldAutoNextSlide);
-        }
-        $('#autoNextSlide').change(updateAutoNext);
-
-        var updateTimeToNextSlide = function () {
-            var val = $('#timeToNextSlide').val();
-            timeToNextSlide = parseFloat(val) * 1000;
-            setCookie(timeToNextSlideCookie, val, COOKIE_DAYS);
-        };
-
-        var timeToNextSlideCookie = "timeToNextSlideCookie";
-        timeByCookie = getCookie(timeToNextSlideCookie);
-        if (timeByCookie == undefined) {
-            updateTimeToNextSlide();
-        } else {
-            timeToNextSlide = parseFloat(timeByCookie) * 1000;
-            $('#timeToNextSlide').val(timeByCookie);
-        }
-
-        $('#timeToNextSlide').keyup(updateTimeToNextSlide);
-    };
-
-    var addNumberButton = function (numberButton) {
-        var navboxUls = $(".navbox ul");
-        var thisNavboxUl = navboxUls[navboxUls.length - 1];
-
-        var newListItem = $("<li />").appendTo(thisNavboxUl);
-        numberButton.appendTo(newListItem);
-
-        // so li's have a space between them and can word-wrap in the box
-        navboxUls.append(document.createTextNode(' '));
-    };
-
     var addImageSlide = function (pic) {
-        /*
-        var pic = {
-            "title": title,
-            "url": url,
-            "commentsLink": commentsLink,
-            "over18": over18,
-            "isVideo": video
-        }
-        */
         pic.isVideo = false;
         if (pic.url.indexOf('gfycat.com') >= 0){
             pic.isVideo = true;
@@ -605,23 +471,6 @@ $(function () {
         }
     };
 
-    var decodeUrl = function (url) {
-        return decodeURIComponent(url.replace(/\+/g, " "));
-    };
-
-    var failCleanup = function() {
-        if (rp.photos.length > 0) {
-            // already loaded images, don't ruin the existing experience
-            return;
-        }
-
-        // remove "loading" title
-        $('#navboxTitle').text('');
-
-        // display alternate recommendations
-        $('#recommend').css({'display':'block'});
-    };
-
     var getRedditImages = function () {
         var handleData = function (data) {
             //redditData = data //global for debugging data
@@ -690,9 +539,4 @@ $(function () {
             }
         };
     };
-
-    if(rp.subredditUrl.indexOf('/imgur') == 0)
-        getImgurAlbum(rp.subredditUrl);
-    else
-        getRedditImages();
 });

@@ -1,11 +1,14 @@
-/* BASIC RESET */
 ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,body,html,p,blockquote,fieldset,input{margin:0; padding:0;}
 
-/* HTML ELEMENTS */
-body { overflow:hidden; background-color: #000; color:#fff;}
+* {box-sizing: border-box;}
 
-/* PICTURES */
-#pictureSlider {
+body {
+  overflow:hidden;
+  background-color: #000;
+  color:#fff;
+}
+
+.slideshow-container {
     position: absolute;
     left: 0;
     top: 0;
@@ -13,16 +16,24 @@ body { overflow:hidden; background-color: #000; color:#fff;}
     height: 100%;
     z-index:-999;
 }
-#pictureSlider div { height:100%; width:100%; position:absolute; z-index:-999; }
+.slideshow-container .viewport {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  z-index: -999;
+}
 
-/* NAVIGATION BOX */
-#navigationBoxes {float: left;}
-a { text-decoration:none; color:#eee; font-weight: bold; }
+a {
+  text-decoration:none;
+  color:#eee;
+  font-weight: bold;
+}
 a:hover {
     opacity: 1.0;
     border-bottom:1px dotted;
 }
 .navbox { width:450px; max-height: 40%; overflow: auto; position:relative; left: 0px; opacity: 0.9; background-color: rgba(0,0,0,0.7);}
+
 /* 108px so the next row is half-visible */
 .numberButtonList { overflow: auto; max-height: 108px; }
 .navbox ul { list-style-type:none; display:block; margin:0px; right:10px; top:10px; text-align: left;}
@@ -34,10 +45,10 @@ a:hover {
     margin-left: 5px;
     text-decoration: none;
     color: #eee;
-    
+
     font: bold 12px Helvetica, Arial, Sans-serif;
     text-align: center;
-    line-height: 18px; 
+    line-height: 18px;
     padding: 3px 5px;
 }
 .over18 {
@@ -61,8 +72,8 @@ a:hover {
     filter: progid:DXImageTransform.Microsoft.Shadow(Strength=3, Direction=135, Color='#EEEEEE');
 }
 
-#controlsDiv {position: absolute; bottom: 0; left: 0;right: 0;}
-#titleDiv {position: absolute; top: 0;left: 0;right: 0;}
+.controls {position: absolute; bottom: 0; left: 0;right: 0;}
+.title-box {position: absolute; top: 0;left: 0;right: 0;}
 .navbox h2 { padding: 10px 20px 10px 10px; font: bold 20px Helvetica, Arial, Sans-serif; }
 .navbox h3 { padding:  0px 20px 10px 10px; font: bold 12px Helvetica, Arial, Sans-serif; }
 .navbox p { padding:20px 20px 20px 20px; font-family: "Segoe UI","HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",Arial,Tahoma,Verdana,sans-serif; font-size:13px; color:#111; }
@@ -73,7 +84,7 @@ a:hover {
     width: 100%;
     font-family: "Segoe UI","HelveticaNeue-Light","Helvetica Neue Light","Helvetica Neue",Arial,Tahoma,Verdana,sans-serif;
     font-size:14px;
-    
+
     }
 .nbmenu li { text-align: left; padding: 10px 10px; max-width: 300px; overflow: hidden; }
 
@@ -85,40 +96,39 @@ a:hover {
 label.checkbox { font-weight: bold; }
 
 .cam { background-image:url("../images/bg_cam_txt.png"); }
-.clouds {  }
 .key { background-image:url("../images/bg_key_txt.png"); }
 .flowers { background-image:url("../images/bg_flowers_txt.png"); }
 
 .collapser { border: solid 1px #555; font-size: 20px; color: #bbb; padding: 0 10px; float:right; cursor: hand; cursor: pointer;}
 .checkbox { cursor: hand; cursor: pointer; }
 
-.prevArrow {
+.previous-arrow {
     position: absolute;
     top: 50%;
     left: 10px;
-    width: 0; 
-    height: 0; 
-    
+    width: 0;
+    height: 0;
+
     border-top: 15px solid transparent;
-    border-bottom: 15px solid transparent; 
-    border-right: 30px solid white; 
+    border-bottom: 15px solid transparent;
+    border-right: 30px solid white;
 
     opacity: 0.8;
-    
+
     cursor: hand; cursor: pointer;
 }
 
-.nextArrow {
+.next-arrow {
     position: absolute;
     top: 50%;
     right: 10px;
-    width: 0; 
-    height: 0; 
-    
+    width: 0;
+    height: 0;
+
     border-top: 15px solid transparent;
-    border-bottom: 15px solid transparent; 
-    border-left: 30px solid white; 
-    
+    border-bottom: 15px solid transparent;
+    border-left: 30px solid white;
+
     opacity: 0.8;
     cursor: hand; cursor: pointer;
 }
@@ -127,5 +137,4 @@ label.checkbox { font-weight: bold; }
     width: 20px;
     padding-left: 10px;
     cursor:pointer;
-}
 }
