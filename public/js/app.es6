@@ -1,6 +1,5 @@
 /*
   Author: Yuval Greenfield (http://uberpython.wordpress.com)
-  Rebuild: Josh Vanderwillik
 
   Favicon by Double-J designs http://www.iconfinder.com/icondetails/68600/64/_icon
   HTML based on http://demo.marcofolio.net/fullscreen_image_slider/
@@ -8,6 +7,18 @@
 */
 
 ;(function(){
+
+/*
+ * The standard jQuery deferred seems to not play nicely with proper Promises.
+ * Becase of this, I am converting what would normally be Promise.resolve
+ * into something jQuery can understand
+ */
+let jResolve = value => {
+  let p = $.Deferred()
+  p.resolve(value)
+  return p
+}
+
 const APPLICATION_ID = 'f2edd1ef8e66eaf'
 const GOOD_PATH_REGEX = /r\/.+/
 const BASE_URL = 'https://www.reddit.com'
@@ -15,23 +26,6 @@ const BASE_URL = 'https://www.reddit.com'
 const ANIMATION_SPEED = 1000
 const timeToNextSlide = 6 * 1000
 const COOKIE_DAYS = 300
-
-const KEY_LEFT = 37
-const KEY_RIGHT = 39
-const KEY_UP = 38
-const KEY_DOWN = 40
-const KEY_ONE = 49
-const KEY_NINE = 57
-const KEY_SPACE = 32
-const KEY_PAGE_UP = 33
-const KEY_PAGE_DOWN = 34
-const KEY_ENTER = 13
-const KEY_A = 65
-const KEY_C = 67
-const KEY_F = 70
-const KEY_I = 73
-const KEY_R = 82
-const KEY_T = 84
 
 const exitFullscreen = document.exitFullscreen
   || document.msExitFullscreen
@@ -52,133 +46,182 @@ const goFullscreen = el => {
 }
 
 class Slideshow {
-
-}
-
-class CollapseBox {
-  constructor ($el) {
+  constructor ($el, redditp) {
     this.$el = $el
-  }
-  init () {
-    this.$el.on('click', '.collapser', () => this.toggle())
-  }
-  toggle () {
-    let state = this.$el.data('openstate');
-    let $collapse = this.$el.find('.collapser')
-    if (state == "open") {
-        $collapse.text("+")
-        var arrowLeftPosition = $collapse.position().left
-        this.$el
-          .animate({left: `-${arrowLeftPosition}px`})
-          .data('openstate', "closed");
-    } else {
-        $collapse.text("-");
-        this.$el
-          .animate({left: "0px"})
-          .data('openstate', "open");
-    }
-}}
-
-class ShortCutListener extends EventEmitter {
-  constructor () {
-    super()
-    this.start()
-  }
-
-  start () {
-    $(document).on('keyup.shortcutlistener', e => {
-      // The control key is most likely used for non redditp things
-      if(e.ctrlKey) return
-      switch (e.keyCode) {
-          case KEY_C: return this.emit('toggle-controls')
-          case KEY_T: return this.emit('toggle-title')
-          case KEY_A: return this.emit('toggle-auto')
-          case KEY_I: return this.emit('open-in-background')
-          case KEY_R: return this.emit('open-comments-in-background')
-          case KEY_F: return this.emit('toggle-fullscreen')
-          case KEY_PAGE_UP: //fall through
-          case KEY_LEFT: //fall through
-          case KEY_UP: return this.emit('previous')
-          case KEY_PAGE_DOWN:
-          case KEY_RIGHT:
-          case KEY_DOWN:
-          case KEY_SPACE: return this.emit('next')
-      }
-    })
-  }
-
-  stop () {
-    $(document).off('.shortcutlistener')
-  }
-}
-
-class RedditP {
-  constructor ($el) {
-    this.$el = $el
+    this.$viewport = $el.find('.viewport')
     this.shortcuts = new ShortCutListener
+    this.rp = redditp
+
+    this.slides = []
+    this.currentSlide = -1
   }
 
   init () {
-    this.setTitle(null, 'Loading Reddit Slideshow', 'Loading Reddit Slideshow')
+    let _this = this
 
-    this.$el.find('.previous-button').on('click', () => this.previousSlide())
-    this.$el.find('.next-button').on('click', () => this.nextSlide())
+    this.$el.find('.previous-arrow').on('click', () => this.previousSlide())
+    this.$el.find('.next-arrow').on('click', () => this.nextSlide())
     this.shortcuts.on('previous', () => this.previousSlide())
     this.shortcuts.on('next', () => this.nextSlide())
-
     this.$el.find('#fullScreenButton').on('click', () => this.toggleFullScreen())
     this.shortcuts.on('toggle-fullscreen', () => this.toggleFullScreen())
 
-    this.shortcuts.start()
+    this.$el.find('.slide-links').on('click', 'a', function (evt) {
+      evt.preventDefault()
+      _this.showSlide(this.dataset.number)
+    })
 
-    this.$el.find(".slideshow-container").touchwipe({
-      wipeLeft: this.nextSlide.bind(this),
-      wipeRight: this.previousSlide.bind(this),
+    this.$el.touchwipe({
+      wipeLeft: () => this.nextSlide(),
+      wipeRight: () => this.previousSlide(),
       min_move_x: 20,
       min_move_y: 20,
       preventDefaultEvents: false
     })
 
-    this.controlsBox = new CollapseBox(this.$el.find('.controls'))
-    this.titleBox = new CollapseBox(this.$el.find('.title-box'))
+    this.showSlide(1)
+  }
 
-    this.controlsBox.init()
-    this.titleBox.init()
+  showSlide (num) {
+    if (num < 1) {
+      throw new Error('Already hit beginning')
+    }
 
-    this.slideshow = new Slideshow(this.$el.find('.slideshow-container'))
+    this.showSpinner()
+    this.rp.getPost(num).then(slide => {
+      this.hideSpinner()
+      this.currentSlide = num
+      let subreddit = `/r/${slide.data.subreddit}`
+      this.rp.setTitle(slide.data.url, subreddit, slide.data.title, slide.data.comments)
+      this.$viewport.empty().append(slide.el)
+    })
+  }
+
+  nextSlide () {
+    this.showSlide(this.currentSlide + 1)
+  }
+
+  previousSlide () {
+    this.showSlide(this.currentSlide - 1)
+  }
+
+  setPageLinks (items) {
+    var frag = document.createDocumentFragment()
+    items.forEach((slide, i) => {
+      let a = document.createElement('a')
+      a.dataset.number = i + 1
+      a.innerHTML = i + 1
+      frag.appendChild(a)
+    })
+    this.$el.find('.slide-links').empty().append(frag)
   }
 
   toggleFullScreen () {
 
   }
 
-  nextSlide () {
-
+  showSpinner () {
+    this.$el.find('.loading-spinner').get(0).hidden = false
   }
 
-  previousSlide () {
+  hideSpinner () {
+    this.$el.find('.loading-spinner').get(0).hidden = true
+  }
+}
 
+class RedditP {
+  constructor ($el) {
+    this.$el = $el
+    this.plugins = []
+    this.posts = []
+
+    this.subredditDataUrl = null
+    this.nextPageToken = null
+
+    this.pageLoaders = {}
   }
 
-  showSlide (slide) {
-    let subredditUrl = `/r/${slide.subreddit}`
-    this.setTitle(slide.url, subredditUrl, slide.title)
+  init () {
+    this.setTitle('', '', 'Loading Reddit Slideshow', '')
+
+    this.slideshow = new Slideshow(this.$el.find('.slideshow-container'), this)
+  }
+
+  registerPlugin (Plugin) {
+    this.plugins.push(Plugin)
+  }
+
+  bestHandler (post) {
+    for (let Plugin of this.plugins) {
+      if (Plugin.canHandle(post)) {
+        return new Plugin(post)
+      }
+    }
+    return false
   }
 
   loadSubreddit (sub) {
     let name = sub === '/'? 'Homepage': sub
     let subredditUrl = BASE_URL + sub
-    this.fetchImages(sub).then(images => {
-      console.log(images)
-      this.showSlide(images[0])
-    }, err => {
-      console.log(err)
-    })
+    this.subredditDataUrl = BASE_URL + sub + ".json"
+    this.slideshow.init()
   }
 
-  fetchImages (sub) {
-    let url = BASE_URL + sub + ".json"
-    return $.getJSON(url).then(res => {
+  getPost (number) {
+    let index = number - 1
+
+    // If we are within 2 slides of the end of the currently loaded set,
+    // we should be fetching some more to reduce wait time
+    if (index + 2 >= this.posts.length) {
+      setTimeout(() => this.loadPosts(this.subredditDataUrl, this.nextPageToken), 0)
+    }
+
+    if (index >= this.posts.length) {
+      return this.loadPosts(this.subredditDataUrl, this.nextPageToken)
+        .then(() => this.getPost(number), err => console.log(err))
+    }
+
+    return jResolve(this.posts[index])
+  }
+
+  loadPosts (url, after) {
+    let key = after || 'start'
+
+    console.log(url, after, key, this.pageLoaders)
+    if (this.pageLoaders[key]) {
+      return this.pageLoaders[key]
+    }
+
+    let loader = this.fetchPosts(url, after).then(posts => {
+      return posts
+        .map(post => {
+          post.url = post.url.replace('http://', 'https://')
+          return post
+        })
+        .map(post => this.bestHandler(post))
+        .filter(post => post !== false)
+        .map(post => {
+          if (post.preload) post.preload()
+          return post
+        })
+    }).then(posts => {
+      posts.forEach(post => this.posts.push(post))
+      this.slideshow.setPageLinks(this.posts)
+    })
+
+    this.pageLoaders[key] = loader
+
+    return loader
+  }
+
+  fetchPosts (url, after) {
+    let params = {}
+    if (after) {
+      params.after = after
+    }
+
+    return $.getJSON(url, params).then(res => {
+      this.nextPageToken = res.data.after
       return res.data.children.map(item => {
         return {
           id: item.data.id,
@@ -193,10 +236,11 @@ class RedditP {
     })
   }
 
-  setTitle (url, subreddit, name) {
-    this.$el.find('.slide-title').text(name)
-    this.$el.find('.active-slide-permalink').attr('href', url)
-    this.$el.find('.subreddit-url')
+  setTitle (postUrl, subreddit, name, commentsUrl) {
+    this.$el.find('.slide-title').text(name).attr('title', name)
+    this.$el.find('.active-slide-link').attr('href', postUrl)
+    this.$el.find('.active-slide-comments').attr('href', commentsUrl)
+    this.$el.find('.subreddit')
       .attr('href', BASE_URL + subreddit)
       .text(subreddit)
     document.title = `${name} | redditP`
@@ -204,9 +248,10 @@ class RedditP {
 }
 
 $(function(){
-  let rp = new RedditP($('#page'))
+  let rp = new RedditP($(document.body))
   rp.init()
 
+  rp.registerPlugin(ImageSlide)
   rp.registerPlugin(ImgurSlide)
   rp.registerPlugin(ImgurAlbumSlide)
   rp.registerPlugin(YoutubeSlide)

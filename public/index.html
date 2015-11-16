@@ -8,89 +8,72 @@
     <meta name="format-detection" content="date=no" />
     <meta name="format-detection" content="address=no" />
     <link rel="shortcut icon" href="/images/favicon.png" />
-    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script type="text/javascript" src="/js/jquery.touchwipe.js"></script>
+    <script type="text/javascript" src="/js/BasicSlide.js"></script>
+    <script type="text/javascript" src="/js/ImageSlide.js"></script>
+    <script type="text/javascript" src="/js/ImgurSlide.js"></script>
+    <script type="text/javascript" src="/js/ImgurAlbumSlide.js"></script>
+    <script type="text/javascript" src="/js/YoutubeSlide.js"></script>
+    <script type="text/javascript" src="/js/GyfCatSlide.js"></script>
     <script type="text/javascript" src="/js/EventEmitter.js"></script>
-    <script type="text/javascript" src="/js/script.js"></script>
+    <script type="text/javascript" src="/js/ShortCutListener.js"></script>
+    <script type="text/javascript" src="/js/app.js"></script>
     <script type="text/javascript" src="https://assets.gfycat.com/js/gfyajax-0.517d.js"></script>
-    <script type="text/javascript">
-      // var _gaq = _gaq || [];
-      // _gaq.push(['_setAccount', 'UA-4533496-15']);
-      // _gaq.push(['_trackPageview']);
-      //
-      // (function() {
-      //   var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-      //   ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-      //   var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      // })();
-    </script>
 </head>
-<body id="page">
-    <div class='navbox controls' data-openstate="open">
-        <div class="collapser">-</div>
-        <div id="navboxContents">
-            <ul class="nbmenu">
-                <li>
-                  <a class="subreddit-url" href="https://reddit.com"></a>
-                </li>
-                <li>
-                    <a href="https://github.com/ubershmekel/redditp/blob/master/README.md" title="hotkeys">hotkeys</a> -
-                    <a href="https://github.com/ubershmekel/redditp" title="redditp source on github">src</a> -
-                    <a href="http://www.reddit.com/r/redditp" title="who made this">blog</a>
-                </li>
-                <li>
-                    <input class="checkbox" type="checkbox" name="nsfw" id="nsfw" value="Auto" checked />
-                    <label class="checkbox over18" for="nsfw"> nsfw</label>
-                    <img src="/images/fullscreen.png" id="fullScreenButton" alt="Fullscreen" />
-                </li>
-            </ul>
-            <ul class="nbmenu">
-                <li>
-                    <input class="checkbox" type="checkbox" name="autoNextSlide" id="autoNextSlide" value="Auto" checked />
-                    <label class="checkbox" for="autoNextSlide"> Auto-next</label>
-                    every <input type="text" name="timeToNextSlide" id="timeToNextSlide" value="5" size="2" /> seconds
-                </li>
-                <li>
-                    <a id='navboxCommentsLink' href='#' title='Comments on reddit'>comments</a>
-                </li>
-                <li>
-                    <a id='navboxLink' href='#' title='placeholder'>image</a>
-                </li>
-            </ul>
-            <div class="numberButtonList">
-                <ul id="allNumberButtons">
-                <!-- Slide number buttons will be injected by jQuery -->
-                </ul>
-                <ul id="sfwNumberButtons">
-                </ul>
-            </div>
-        </div>
+<body>
+  <div class="title-bar">
+    <div class="logo-box">
+      <img src="/images/logo-small.svg" alt="redditP" />
     </div>
 
-    <div class='navbox title-box' data-openstate="open">
-        <div class="collapser">-</div>
-        <h2 class='slide-title'>
-            <noscript>Javascript is required for redditp to work :(</noscript>
-        </h2>
-        <h3>
-          <a class="active-slide-permalink" href="http://www.reddit.com">
-            permalink
-          </a>
-        </h3>
+    <div class="subreddit-box">
+      <h2 class="subreddit"></h2>
     </div>
 
-    <div id="recommend" style="display:none; text-align: center; margin: 10px; color: rgb(170, 170, 170);">
-      <p>Maybe try these presentations instead:</p>
+    <div class="title-box">
+      <h2 class="slide-title">
+      </h2>
+      <a class="active-slide-link" href="http://www.reddit.com">
+        link
+      </a>
+      <a class="active-slide-comments" href="http://www.reddit.com">
+        comments
+      </a>
     </div>
+  </div>
 
-
-    <div class="slideshow-container">
-      <div class="previous-arrow" title="The arrow keys work too"></div>
-      <div class="next-arrow" title="Try the arrow keys too"></div>
-
-      <div class="viewport"></div>
+  <div class="slideshow-container">
+    <div class="loading-spinner">
+      <div class="bar"></div>
+      <div class="bar"></div>
+      <div class="bar"></div>
     </div>
+    <div class="previous-arrow" title="The arrow keys work too"></div>
+    <div class="next-arrow" title="Try the arrow keys too"></div>
 
+    <div class="viewport"></div>
+
+    <div class="slide-links"></div>
+  </div>
+
+  <div class="footer">
+    <a class="footer-item" href="https://github.com/ubershmekel/redditp/blob/master/README.md" title="hotkeys">hotkeys</a>
+    <a class="footer-item" href="https://github.com/ubershmekel/redditp" title="redditp source on github">src</a>
+    <a class="footer-item" href="http://www.reddit.com/r/redditp" title="who made this">blog</a>
+    <div class="footer-item auto-next-form">
+      <input class="checkbox" type="checkbox" name="autoNextSlide" id="autoNextSlide" value="Auto" checked />
+      <label class="checkbox" for="autoNextSlide">Auto-next</label>
+      every
+      <input type="text" name="timeToNextSlide" id="timeToNextSlide" value="5" size="2" />
+      seconds
+    </div>
+    <div class="footer-item nsfw-form">
+      <input class="checkbox" type="checkbox" name="nsfw" id="nsfw" value="Auto" checked />
+      <label class="checkbox over18" for="nsfw">nsfw</label>
+    </div>
+    <img class="footer-item" src="/images/fullscreen.png" alt="Fullscreen" />
+  </div>
 </body>
 </html>

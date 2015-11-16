@@ -1,0 +1,18 @@
+#! /usr/bin/env bash
+
+image_name=test-redditp2
+instance_name=redditp2-whisp
+
+eval $(docker-machine env island-web-host)
+docker build -t $image_name .
+
+docker run \
+  -d \
+  --restart always \
+  --name $instance_name \
+  -p 127.0.0.1::80 \
+  \
+  -e CERTIFICATE_PATH=/etc/nginx/ssl/joshwillik.com \
+  -e VIRTUAL_HOST=redditp2.joshwillik.com \
+  \
+  $image_name
