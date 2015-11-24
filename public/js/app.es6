@@ -89,6 +89,7 @@ class Slideshow {
 
     this.showSpinner()
     this.rp.getPost(num).then(slide => {
+      console.log('GOT SLIDE', slide)
       this.hideSpinner()
       this.currentSlide = num
       let subreddit = `/r/${slide.data.subreddit}`

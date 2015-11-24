@@ -25,8 +25,4 @@ class ImageSlide extends BasicSlide {
     this.img.onload = () => this.loaded()
     this.img.onerror = () => this.failed()
   }
-
-  loaded () {
-    super.loaded()
-  }
 }

@@ -9,6 +9,8 @@ gulp watch &
 gulp_pid=$!
 trap "kill $gulp_pid" EXIT
 
+eval $(docker-machine env -u)
+
 docker run \
   -it \
   --rm \
