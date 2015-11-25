@@ -13,24 +13,32 @@ class BasicSlide {
     let loadingWrapper = document.createElement('div')
     loadingWrapper.className = 'loading-wrapper'
 
-    let nsfwOverlay = document.createElement('div')
-    nsfwOverlay.className = 'nsfw'
-    nsfwOverlay.innerHTML = 'nsfw'
-
     loadingWrapper.appendChild(spinner)
     el.appendChild(loadingWrapper)
-
-    if (slide.nsfw) {
-      el.appendChild(nsfwOverlay)
-      nsfwOverlay.addEventListener('click', () => el.removeChild(nsfwOverlay))
-    }
 
     this.data = slide
 
     this.el = el
     this.loadingEl = loadingWrapper
     this.errorEl = error
+
+    if (slide.nsfw) {
+      this.isNSFW()
+    }
+  }
+
+  isNSFW () {
+    if (this.nsfwOverlay) {
+      return
+    }
+
+    let nsfwOverlay = document.createElement('div')
+    nsfwOverlay.className = 'nsfw'
+    nsfwOverlay.innerHTML = 'nsfw'
+    nsfwOverlay.addEventListener('click', () => this.el.removeChild(nsfwOverlay))
     this.nsfwOverlay = nsfwOverlay
+
+    this.el.appendChild(nsfwOverlay)
   }
 
   loaded () {

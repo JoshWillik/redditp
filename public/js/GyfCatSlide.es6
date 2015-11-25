@@ -1,3 +1,6 @@
+const MP4_TYPE = 'video/mp4; codecs="mp4v.20.8"'
+const WEBM_TYPE = 'video/webm; codecs="vp8, vorbis"'
+
 class GyfCatSlide extends BasicSlide {
   static canHandle (post) {
     return post.domain === 'gfycat.com'
@@ -7,20 +10,88 @@ class GyfCatSlide extends BasicSlide {
     slide.url = slide.url.replace('http://', 'https://')
     super(slide)
 
-    let img = document.createElement('img')
-    img.style.maxWidth = '100%'
-    img.style.maxHeight = '100%'
-    img.style.display = 'block'
+    let video = document.createElement('video')
+    video.loop = true
+    video.muted = true
+    video.autoplay = false
+    video.style.maxWidth = '100%'
+    video.style.maxHeight = '100%'
+    video.style.display = 'block'
 
-    this.img = img
+    this.gfycatData = null
+    this._data = null
+    this.initialized = false
+
+    this.video = video
+  }
+
+  correctUrl (url) {
+    return url.replace('http://', 'https://')
   }
 
   preload () {
-    this.img.onload = () => this.loaded()
-    this.img.onerror = () => this.failed()
-    this.img.dataset.id = this.data.url.split('/').pop()
-    this.img.className = 'gfyitem'
+    let id = this.data.url.split('/').pop()
+    this.gfycatData = $.getJSON(`https://gfycat.com/cajax/get/${id}`).then(data => {
+      this._data = data.gfyItem
+      if (data.gfyItem.nsfw) {
+        this.isNSFW()
+      }
 
-    this.el.appendChild(this.img)
+      if (this.video.canPlayType) {
+        if (this.video.canPlayType(WEBM_TYPE) !== "") {
+          return this.correctUrl(data.gfyItem.webmUrl)
+        } else if (this.video.canPlayType(MP4_TYPE) != "") {
+          return this.correctUrl(data.gfyItem.mp4Url)
+        } else {
+          return false
+        }
+      } else {
+        return false
+      }
+    }, () => this.failed())
+  }
+
+  initialize () {
+    this.initialized = true
+
+    this.gfycatData.then(url => {
+      if (url === false) {
+        let p = document.createElement('p')
+        p.innerHTML = `I can't be bothered to make GIFs work for gfycat. If you need this let me know.<br>Search redditp on Github.`
+        this.el.appendChild(p)
+        this.loaded()
+        return
+      } else {
+        this.video.src = url
+        this.video.addEventListener('canplay', () => this.loaded())
+        this.video.addEventListener('error', () => this.failed())
+        this.el.appendChild(this.video)
+      }
+    })
+  }
+
+  loaded () {
+    super.loaded()
+    this.start()
+  }
+
+  shown () {
+    if (!this.initialized) {
+      this.initialize()
+    }
+
+    this.start()
+  }
+
+  hidden () {
+    this.stop()
+  }
+
+  start () {
+    this.video.play()
+  }
+
+  stop () {
+    this.video.pause()
   }
 }
