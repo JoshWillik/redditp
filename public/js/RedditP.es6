@@ -175,7 +175,7 @@ $(function(){
   rp.registerPlugin(ImgurSlide)
   rp.registerPlugin(ImgurAlbumSlide)
   rp.registerPlugin(YoutubeSlide)
-  rp.registerPlugin(GyfCatSlide)
+  rp.registerPlugin(GfyCatSlide)
 
   rp.loadSubreddit(window.location.pathname)
 

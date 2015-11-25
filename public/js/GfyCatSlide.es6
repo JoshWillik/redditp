@@ -1,7 +1,7 @@
 const MP4_TYPE = 'video/mp4; codecs="mp4v.20.8"'
 const WEBM_TYPE = 'video/webm; codecs="vp8, vorbis"'
 
-class GyfCatSlide extends BasicSlide {
+class GfyCatSlide extends BasicSlide {
   static canHandle (post) {
     return post.domain === 'gfycat.com'
   }
@@ -33,7 +33,8 @@ class GyfCatSlide extends BasicSlide {
     let id = this.data.url.split('/').pop()
     this.gfycatData = $.getJSON(`https://gfycat.com/cajax/get/${id}`).then(data => {
       this._data = data.gfyItem
-      if (data.gfyItem.nsfw) {
+      console.log(data.gfyItem)
+      if (data.gfyItem.nsfw === "1") {
         this.isNSFW()
       }
 
@@ -65,6 +66,7 @@ class GyfCatSlide extends BasicSlide {
         this.video.src = url
         this.video.addEventListener('canplay', () => this.loaded())
         this.video.addEventListener('error', () => this.failed())
+        this.video.addEventListener('click', () => this.video.paused? this.start(): this.stop())
         this.el.appendChild(this.video)
       }
     })
