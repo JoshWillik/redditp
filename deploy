@@ -6,6 +6,7 @@ instance_name=redditp2-whisp
 eval $(docker-machine env island-web-host)
 docker build -t $image_name .
 
+docker rm -f $instance_name || :
 docker run \
   -d \
   --restart always \

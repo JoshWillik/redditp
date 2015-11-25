@@ -16,7 +16,8 @@ const KEY_F = 70
 const KEY_I = 73
 const KEY_R = 82
 const KEY_T = 84
-
+const KEY_PLUS = 61
+const KEY_MINUS = 173
 
 class ShortCutListener extends EventEmitter {
   constructor () {
@@ -36,11 +37,9 @@ class ShortCutListener extends EventEmitter {
           case KEY_R: return this.emit('open-comments-in-background')
           case KEY_F: return this.emit('toggle-fullscreen')
           case KEY_PAGE_UP: //fall through
-          case KEY_LEFT: //fall through
-          case KEY_UP: return this.emit('previous')
+          case KEY_LEFT: return this.emit('previous')
           case KEY_PAGE_DOWN:
           case KEY_RIGHT:
-          case KEY_DOWN:
           case KEY_SPACE: return this.emit('next')
       }
     })

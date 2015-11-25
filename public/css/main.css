@@ -186,6 +186,11 @@ a:hover {
   position: relative;
   height: 100%;
   width: 100%;
+  overflow: auto;
+  text-align: center;
+}
+
+.slide:not(.zoomed) {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -212,6 +217,20 @@ a:hover {
 .loading-wrapper .error-message {
   font-size: 2em;
   font-weight: bold;
+}
+
+.nsfw {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background: black;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .spinner {

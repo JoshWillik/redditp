@@ -53,7 +53,8 @@ class Slideshow {
     this.rp = redditp
 
     this.slides = []
-    this.currentSlide = -1
+    this.currentSlideIndex = -1
+    this.currentSlide = null
   }
 
   init () {
@@ -65,6 +66,17 @@ class Slideshow {
     this.shortcuts.on('next', () => this.nextSlide())
     this.$el.find('#fullScreenButton').on('click', () => this.toggleFullScreen())
     this.shortcuts.on('toggle-fullscreen', () => this.toggleFullScreen())
+    this.shortcuts.on('zoom', () => {
+      console.log('zooming', this.currentSlide)
+      if (this.currentSlide && this.currentSlide.zoom) {
+        this.currentSlide.zoom()
+      }
+    })
+    this.shortcuts.on('shrink', () => {
+      if (this.currentSlide && this.currentSlide.shrink) {
+        this.currentSlide.shrink()
+      }
+    })
 
     this.$el.find('.slide-links').on('click', 'a', function (evt) {
       evt.preventDefault()
@@ -89,9 +101,10 @@ class Slideshow {
 
     this.showSpinner()
     this.rp.getPost(num).then(slide => {
-      console.log('GOT SLIDE', slide)
+      // console.log('GOT SLIDE', slide)
       this.hideSpinner()
-      this.currentSlide = num
+      this.currentSlideIndex = num
+      this.currentSlide = slide
       let subreddit = `/r/${slide.data.subreddit}`
       this.rp.setTitle(slide.data.url, subreddit, slide.data.title, slide.data.comments)
       this.$viewport.empty().append(slide.el)
@@ -99,11 +112,11 @@ class Slideshow {
   }
 
   nextSlide () {
-    this.showSlide(this.currentSlide + 1)
+    this.showSlide(this.currentSlideIndex + 1)
   }
 
   previousSlide () {
-    this.showSlide(this.currentSlide - 1)
+    this.showSlide(this.currentSlideIndex - 1)
   }
 
   setPageLinks (items) {
