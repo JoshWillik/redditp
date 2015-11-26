@@ -17,6 +17,7 @@ body {
   background: #2e7089;
   height: 3em;
   display: flex;
+  border-bottom: 2px solid #1a3e4c;
 }
 
 .logo-box {
@@ -45,7 +46,7 @@ body {
 .title-box .slide-title {
   white-space: nowrap;
   overflow: hidden;
-  max-width: 50vw;
+  max-width: 60vw;
   text-overflow: ellipsis;
 }
 
@@ -80,22 +81,55 @@ body {
   flex: 1 1 auto;
 }
 
-.slideshow-container .slide-links {
-  width: 100%;
+.slideshow-container .sidebar {
   position: absolute;
+  transition: all 500ms;
+  left: -20em;
+  width: 20em;
+  top: 0;
   bottom: 0;
+  background: #2e7089;
+  border-top: 1px solid #3b90b0;
+  border-bottom: 2px solid #1a3e4c;
+  z-index: 15;
+  padding: 1em;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.slideshow-container .sidebar.active {
   left: 0;
-  background: rgba(0, 0, 0, 0.5);
-  overflow-x: auto;
+}
+
+.slideshow-container .sidebar h2 {
+  margin-bottom: 1em;
+}
+
+.slideshow-container .slide-links {
+  overflow-y: auto;
+  width: 100%;
 }
 
 .slideshow-container .slide-links a {
-  margin: 0 0.5em;
+  margin: 0.5em;
+  cursor: pointer;
+  display: inline-block;
 }
 
 .slideshow-container .loading-spinner {
   position: absolute;
   z-index: 10;
+}
+
+.slideshow-container .sidebar-toggle {
+  position: absolute;
+  border-radius: 100%;
+  padding: 0.5em;
+  top: 0.5em;
+  left: 0.5em;
+  z-index: 20;
+  cursor: pointer;
 }
 
 .loading-spinner {
@@ -127,6 +161,7 @@ body {
 .footer {
   flex-shrink: 0;
   background: #2e7089;
+  border-top: 1px solid #3b90b0;
   height: 2em;
   display: flex;
   align-items: center;
@@ -147,10 +182,6 @@ a:hover {
   border-bottom:1px dotted;
 }
 
-.nsfw {
-  color: #f99;
-}
-
 .previous-arrow {
   position: absolute;
   top: 50%;
@@ -163,7 +194,7 @@ a:hover {
   border-right: 30px solid white;
   opacity: 0.8;
   cursor: pointer;
-  z-index: 30;
+  z-index: 10;
 }
 
 .next-arrow {
@@ -179,7 +210,7 @@ a:hover {
 
   opacity: 0.8;
   cursor: pointer;
-  z-index: 30;
+  z-index: 10;
 }
 
 .slide {
@@ -194,10 +225,6 @@ a:hover {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.slide-links a {
-  cursor: pointer;
 }
 
 .loading-wrapper {
@@ -220,6 +247,7 @@ a:hover {
 }
 
 .nsfw {
+  color: #f99;
   position: absolute;
   top: 0;
   bottom: 0;

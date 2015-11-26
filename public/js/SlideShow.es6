@@ -2,6 +2,7 @@ class Slideshow {
   constructor ($el, redditp) {
     this.$el = $el
     this.$viewport = $el.find('.viewport')
+    this.$sidebar = $el.find('.sidebar')
     this.shortcuts = new ShortCutListener
     this.rp = redditp
 
@@ -13,6 +14,7 @@ class Slideshow {
   init () {
     let _this = this
 
+    this.$el.find('.sidebar-toggle').on('click', () => this.toggleSidebar())
     this.$el.find('.previous-arrow').on('click', () => this.previousSlide())
     this.$el.find('.next-arrow').on('click', () => this.nextSlide())
     this.shortcuts.on('previous', () => this.previousSlide())
@@ -23,6 +25,7 @@ class Slideshow {
     this.$el.find('.slide-links').on('click', 'a', function (evt) {
       evt.preventDefault()
       _this.showSlide(this.dataset.number)
+      _this.toggleSidebar()
     })
 
     this.$el.touchwipe({
@@ -86,6 +89,11 @@ class Slideshow {
 
   toggleFullScreen () {
 
+  }
+
+  toggleSidebar () {
+    this.$sidebar.toggleClass('active')
+    this.$el.find('.sidebar-toggle .fa').toggleClass('fa-bars fa-times')
   }
 
   showSpinner () {

@@ -9,19 +9,18 @@
     <meta name="format-detection" content="address=no" />
     <link rel="shortcut icon" href="/images/favicon.png" />
     <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script type="text/javascript" src="/js/jquery.touchwipe.js"></script>
     <script type="text/javascript" src="/js/BasicSlide.js"></script>
     <script type="text/javascript" src="/js/ImageSlide.js"></script>
     <script type="text/javascript" src="/js/ImgurSlide.js"></script>
     <script type="text/javascript" src="/js/ImgurAlbumSlide.js"></script>
-    <script type="text/javascript" src="/js/YoutubeSlide.js"></script>
     <script type="text/javascript" src="/js/GfyCatSlide.js"></script>
     <script type="text/javascript" src="/js/EventEmitter.js"></script>
     <script type="text/javascript" src="/js/ShortCutListener.js"></script>
     <script type="text/javascript" src="/js/SlideShow.js"></script>
     <script type="text/javascript" src="/js/RedditP.js"></script>
-    <script type="text/javascript" src="https://assets.gfycat.com/js/gfyajax-0.517d.js"></script>
 </head>
 <body>
   <div class="title-bar">
@@ -37,10 +36,10 @@
       <h2 class="slide-title">
       </h2>
       <a class="active-slide-link" href="http://www.reddit.com">
-        link
+        <i class="fa fa-link"></i>
       </a>
       <a class="active-slide-comments" href="http://www.reddit.com">
-        comments
+        <i class="fa fa-comment"></i>
       </a>
     </div>
   </div>
@@ -56,7 +55,13 @@
 
     <div class="viewport"></div>
 
-    <div class="slide-links"></div>
+    <div class="sidebar">
+      <h2>Post links</h2>
+      <div class="slide-links"></div>
+    </div>
+    <div class="sidebar-toggle">
+      <i class="fa fa-2x fa-bars"></i>
+    </div>
   </div>
 
   <div class="footer">
@@ -74,7 +79,7 @@
       <input class="checkbox" type="checkbox" name="nsfw" id="nsfw" value="Auto" checked />
       <label class="checkbox over18" for="nsfw">nsfw</label>
     </div>
-    <img class="footer-item" src="/images/fullscreen.png" alt="Fullscreen" />
+    <i class="footer-item fa fa-arrows-alt"></i>
   </div>
 </body>
 </html>
