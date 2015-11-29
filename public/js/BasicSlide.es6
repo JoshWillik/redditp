@@ -1,5 +1,6 @@
-class BasicSlide {
+class BasicSlide extends EventEmitter {
   constructor (slide) {
+    super()
     let el = document.createElement('div')
     el.className = 'slide'
 
@@ -22,7 +23,7 @@ class BasicSlide {
     this.loadingEl = loadingWrapper
     this.errorEl = error
 
-    if (slide.nsfw) {
+    if (slide.nsfw && !SETTINGS.get('showNsfw')) {
       this.isNSFW()
     }
   }

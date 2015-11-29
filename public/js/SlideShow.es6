@@ -40,7 +40,7 @@ class Slideshow {
 
     this.shortcuts = new ShortCutListener
     this.rp = redditp
-    this.settings = settings
+    SETTINGS = settings
 
     this.slides = []
     this.currentSlideIndex = -1
@@ -146,9 +146,9 @@ class Slideshow {
   }
 
   startSlideshowTimeout (slide, nextSlideNum) {
-    if (this.settings.get('autoNext')) {
+    if (SETTINGS.get('autoNext')) {
       let shouldContinue
-      let timeout = wait(this.settings.get('autoNextTimeout'))
+      let timeout = wait(SETTINGS.get('autoNextTimeout'))
 
       if (slide.done) {
         let slideDone = slide.done()
@@ -157,11 +157,7 @@ class Slideshow {
         shouldContinue = timeout
       }
 
-      this.slideProgress = 0
-      this.slideProgressInterval = setInterval(
-        () => this.setProgress(this.slideProgress++),
-        (this.settings.get('autoNextTimeout') * 1000) / 100
-      )
+      this.setProgressTimeout(SETTINGS.get('autoNextTimeout'))
       this.nextSlideWaiter = new CancelablePromise(shouldContinue)
       this.nextSlideWaiter.then(() => this.showSlide(nextSlideNum))
     }
@@ -185,5 +181,13 @@ class Slideshow {
     this.progress.lineTo(50, 50)
     this.progress.fillStyle = '#ffffff'
     this.progress.fill()
+  }
+
+  setProgressTimeout (seconds) {
+    let counter = 0
+    this.slideProgressInterval = setInterval(
+      () => this.setProgress(counter++ % 100),
+      (seconds * 1000) / 100
+    )
   }
 }

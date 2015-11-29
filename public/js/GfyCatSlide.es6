@@ -11,7 +11,6 @@ class GfyCatSlide extends BasicSlide {
     super(slide)
 
     let video = document.createElement('video')
-    video.loop = true
     video.muted = true
     video.autoplay = false
     video.style.maxWidth = '100%'
@@ -66,6 +65,7 @@ class GfyCatSlide extends BasicSlide {
         this.video.addEventListener('canplay', () => this.loaded())
         this.video.addEventListener('error', () => this.failed())
         this.video.addEventListener('click', () => this.video.paused? this.start(): this.stop())
+        this.video.addEventListener('ended', () => this.start())
         this.el.appendChild(this.video)
       }
     })
@@ -94,5 +94,17 @@ class GfyCatSlide extends BasicSlide {
 
   stop () {
     this.video.pause()
+  }
+
+  done () {
+    let _this = this
+    let promise = $.Deferred()
+
+    this.video.addEventListener('ended', function videoEnded () {
+      _this.video.removeEventListener('ended', videoEnded)
+      promise.resolve()
+    })
+
+    return promise.then(() => console.log('finished'))
   }
 }

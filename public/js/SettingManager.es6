@@ -6,10 +6,18 @@ class SettingManager extends EventEmitter {
   }
 
   loadConfig () {
-    this._settings.showNsfw = this._loadKey('show-nsfw') || false
-    this._settings.autoNext = this._loadKey('auto-next') || true
-    this._settings.autoNextTimeout = this._loadKey('auto-next-timeout') || 5
-  }
+    this._settings.showNsfw = this._loadKey('showNsfw')
+    if (this._settings.showNsfw === null) {
+      this._settings.showNsfw = false
+    }
+    this._settings.autoNext = this._loadKey('autoNext')
+    if (this._settings.autoNext === null) {
+      this._settings.autoNext = true
+    }
+    this._settings.autoNextTimeout = this._loadKey('autoNextTimeout')
+    if (this._settings.autoNextTimeout === null) {
+      this._settings.autoNextTimeout = 5
+    }  }
 
   get (key) {
     return this._settings[key]
@@ -23,7 +31,7 @@ class SettingManager extends EventEmitter {
   }
 
   _loadKey (key) {
-    return localStorage.getItem(key)
+    return JSON.parse(localStorage.getItem(key))
   }
   _saveKey (key, value) {
     return localStorage.setItem(key, value)

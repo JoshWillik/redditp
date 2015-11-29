@@ -56,20 +56,31 @@ class RedditP {
 
     this.pageLoaders = {}
 
-    this.settings = new SettingManager
+    window.SETTINGS = new SettingManager
+
+    this.$autoNext = this.$el.find('.auto-next')
+    this.$autoNextTimeout = this.$el.find('.auto-next-timeout')
+    this.$showNsfw = this.$el.find('.show-nsfw')
   }
 
   init () {
     this.setupView()
     this.setTitle('', '', 'Loading Reddit Slideshow', '')
-    this.slideshow = new Slideshow(this.$el.find('.slideshow-container'), this, this.settings)
+    this.slideshow = new Slideshow(this.$el.find('.slideshow-container'), this, window.SETTINGS)
     window.slideshow = this.slideshow
+
+    this.$autoNext.on('click', () => {
+      window.SETTINGS.set('autoNext', this.$autoNext.is(':checked'))
+    })
+    this.$autoNextTimeout.on('change', () => window.SETTINGS.set('autoNextTimeout', parseInt(this.$autoNextTimeout.val(), 10)))
+    this.$showNsfw.on('click', () => window.SETTINGS.set('showNsfw', this.$showNsfw.is(':checked')))
+
   }
 
   setupView () {
-    this.$el.find('.auto-next').prop('checked', this.settings.get('autoNext'))
-    this.$el.find('.auto-next-timeout').val(this.settings.get('autoNextTimeout'))
-    this.$el.find('.show-nsfw').prop('checked', this.settings.get('showNsfw'))
+    this.$autoNext.prop('checked', window.SETTINGS.get('autoNext'))
+    this.$autoNextTimeout.val(window.SETTINGS.get('autoNextTimeout'))
+    this.$showNsfw.prop('checked', window.SETTINGS.get('showNsfw'))
   }
 
   registerPlugin (Plugin) {
