@@ -13,6 +13,7 @@ class GfyCatSlide extends BasicSlide {
     let video = document.createElement('video')
     video.muted = true
     video.autoplay = false
+    video.loop = true
     video.style.maxWidth = '100%'
     video.style.maxHeight = '100%'
     video.style.display = 'block'
@@ -100,7 +101,7 @@ class GfyCatSlide extends BasicSlide {
     let _this = this
     let promise = $.Deferred()
 
-    this.video.addEventListener('ended', function videoEnded () {
+    this.video.addEventListener('seeked', function videoEnded () {
       _this.video.removeEventListener('ended', videoEnded)
       promise.resolve()
     })
