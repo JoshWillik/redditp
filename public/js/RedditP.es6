@@ -55,12 +55,21 @@ class RedditP {
     this.nextPageToken = 'start'
 
     this.pageLoaders = {}
+
+    this.settings = new SettingManager
   }
 
   init () {
+    this.setupView()
     this.setTitle('', '', 'Loading Reddit Slideshow', '')
+    this.slideshow = new Slideshow(this.$el.find('.slideshow-container'), this, this.settings)
+    window.slideshow = this.slideshow
+  }
 
-    this.slideshow = new Slideshow(this.$el.find('.slideshow-container'), this)
+  setupView () {
+    this.$el.find('.auto-next').prop('checked', this.settings.get('autoNext'))
+    this.$el.find('.auto-next-timeout').val(this.settings.get('autoNextTimeout'))
+    this.$el.find('.show-nsfw').prop('checked', this.settings.get('showNsfw'))
   }
 
   registerPlugin (Plugin) {

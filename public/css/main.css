@@ -261,6 +261,10 @@ a:hover {
   justify-content: center;
 }
 
+.auto-next-timeout {
+  text-align: center;
+}
+
 .spinner {
   font-size: 0.5em;
   position: relative;
@@ -275,6 +279,14 @@ a:hover {
   border-radius: 50%;
   width: 10em;
   height: 10em;
+}
+
+.progress-circle {
+  position: absolute;
+  top: 1em;
+  right: 1em;
+  height: 1em;
+  width: 1em;
 }
 
 @keyframes loading_bar {

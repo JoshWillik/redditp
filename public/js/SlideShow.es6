@@ -1,10 +1,46 @@
+function wait (seconds) {
+  let promise = $.Deferred()
+
+  setTimeout(() => promise.resolve(), seconds * 1000)
+
+  return promise
+}
+
+class CancelablePromise {
+  constructor (promise) {
+    this.promise = promise
+    this.shouldContinue = true
+  }
+
+  then (fn) {
+    this.promise.then(this.wrap(fn))
+  }
+
+  wrap (fn) {
+    return () => {
+      if (this.shouldContinue) {
+        return fn()
+      }
+    }
+  }
+
+  cancel () {
+    this.shouldContinue = false
+  }
+}
+
 class Slideshow {
-  constructor ($el, redditp) {
+  constructor ($el, redditp, settings) {
     this.$el = $el
     this.$viewport = $el.find('.viewport')
     this.$sidebar = $el.find('.sidebar')
+
+    this.$progress = $el.find('.progress-circle')
+    this.progress = this.$progress.get(0).getContext('2d')
+
     this.shortcuts = new ShortCutListener
     this.rp = redditp
+    this.settings = settings
 
     this.slides = []
     this.currentSlideIndex = -1
@@ -49,6 +85,9 @@ class Slideshow {
     }
 
     this.showSpinner()
+
+    this.cancelSlideshowTimeout()
+
     this.rp.getPost(num).then(slide => {
       this.hideSpinner()
 
@@ -65,6 +104,8 @@ class Slideshow {
         this.$viewport.empty().append($(`<p>That's all, folks!</p>`).css('color', 'white'))
         this.rp.setTitle(null, null, 'End of subreddit', null)
       }
+
+      this.startSlideshowTimeout(slide, num + 1)
     })
   }
 
@@ -102,5 +143,47 @@ class Slideshow {
 
   hideSpinner () {
     this.$el.find('.loading-spinner').get(0).hidden = true
+  }
+
+  startSlideshowTimeout (slide, nextSlideNum) {
+    if (this.settings.get('autoNext')) {
+      let shouldContinue
+      let timeout = wait(this.settings.get('autoNextTimeout'))
+
+      if (slide.done) {
+        let slideDone = slide.done()
+        shouldContinue = $.when(slideDone, timeout)
+      } else {
+        shouldContinue = timeout
+      }
+
+      this.slideProgress = 0
+      this.slideProgressInterval = setInterval(
+        () => this.setProgress(this.slideProgress++),
+        (this.settings.get('autoNextTimeout') * 1000) / 100
+      )
+      this.nextSlideWaiter = new CancelablePromise(shouldContinue)
+      this.nextSlideWaiter.then(() => this.showSlide(nextSlideNum))
+    }
+  }
+
+  cancelSlideshowTimeout () {
+    if (this.nextSlideWaiter) {
+      this.setProgress(0)
+      clearInterval(this.slideProgressInterval)
+      this.nextSlideWaiter.cancel()
+    }
+  }
+
+  setProgress (num) {
+    let offset = -(Math.PI / 2)
+    let progress = (Math.PI * 2) * (num / 100)
+    this.progress.clearRect(0, 0, 100, 100)
+    this.progress.beginPath()
+    this.progress.moveTo(50, 50)
+    this.progress.arc(50, 50, 50, offset, progress + offset)
+    this.progress.lineTo(50, 50)
+    this.progress.fillStyle = '#ffffff'
+    this.progress.fill()
   }
 }

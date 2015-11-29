@@ -33,7 +33,6 @@ class GfyCatSlide extends BasicSlide {
     let id = this.data.url.split('/').pop()
     this.gfycatData = $.getJSON(`https://gfycat.com/cajax/get/${id}`).then(data => {
       this._data = data.gfyItem
-      console.log(data.gfyItem)
       if (data.gfyItem.nsfw === "1") {
         this.isNSFW()
       }

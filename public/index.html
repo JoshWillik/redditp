@@ -18,6 +18,7 @@
     <script type="text/javascript" src="/js/ImgurAlbumSlide.js"></script>
     <script type="text/javascript" src="/js/GfyCatSlide.js"></script>
     <script type="text/javascript" src="/js/EventEmitter.js"></script>
+    <script type="text/javascript" src="/js/SettingManager.js"></script>
     <script type="text/javascript" src="/js/ShortCutListener.js"></script>
     <script type="text/javascript" src="/js/SlideShow.js"></script>
     <script type="text/javascript" src="/js/RedditP.js"></script>
@@ -50,6 +51,9 @@
       <div class="bar"></div>
       <div class="bar"></div>
     </div>
+
+    <canvas width="100" height="100" class="progress-circle"></canvas>
+
     <div class="previous-arrow" title="The arrow keys work too"></div>
     <div class="next-arrow" title="Try the arrow keys too"></div>
 
@@ -65,19 +69,16 @@
   </div>
 
   <div class="footer">
-    <a class="footer-item" href="https://github.com/ubershmekel/redditp/blob/master/README.md" title="hotkeys">hotkeys</a>
-    <a class="footer-item" href="https://github.com/ubershmekel/redditp" title="redditp source on github">src</a>
-    <a class="footer-item" href="http://www.reddit.com/r/redditp" title="who made this">blog</a>
     <div class="footer-item auto-next-form">
-      <input class="checkbox" type="checkbox" name="autoNextSlide" id="autoNextSlide" value="Auto" checked />
-      <label class="checkbox" for="autoNextSlide">Auto-next</label>
+      <input class="auto-next" type="checkbox" id="auto-next-toggle">
+      <label for="auto-next-toggle">Auto-next</label>
       every
-      <input type="text" name="timeToNextSlide" id="timeToNextSlide" value="5" size="2" />
+      <input type="text" class="auto-next-timeout" id="auto-next-timeout" size="2" />
       seconds
     </div>
     <div class="footer-item nsfw-form">
-      <input class="checkbox" type="checkbox" name="nsfw" id="nsfw" value="Auto" checked />
-      <label class="checkbox over18" for="nsfw">nsfw</label>
+      <input class="show-nsfw" type="checkbox" id="nsfw-toggle">
+      <label for="nsfw-toggle">nsfw</label>
     </div>
     <i class="footer-item fa fa-arrows-alt"></i>
   </div>
